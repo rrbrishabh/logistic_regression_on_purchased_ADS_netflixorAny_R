@@ -1,0 +1,89 @@
+---
+title: "logistic_regression_on_socialNetworkAds_R"
+output: html_document
+---
+
+# In this task , we are doing logistic regression on it basically logistic regression gets 0 or 1 value means ture or false . about the task we have the data of who is puchased ads.
+
+## firstly, we load the data from the csv files becouase we have data in csv format and see the data
+
+
+```{r setup, include=FALSE}
+library(readr)
+
+dataLoad <- read_csv("Social_Network_Ads.csv")
+head(dataLoad)
+
+```
+
+## user id is not imp for our dataset so we remove it
+##  table function is most important it helps for barplot for gender
+
+```{r cars}
+dataLoad$`User ID` = NULL
+barplot(table(dataLoad$Gender))
+```
+
+# scaling of the data
+# converting the purchase column in factor
+
+
+```{r pressure, echo=FALSE}
+dataLoad$Purchased = factor(dataLoad$Purchased, levels = c(0,1))
+head(dataLoad)
+
+dataLoad[,2:3] = scale(dataLoad[,2:3])
+head(dataLoad)
+```
+
+# create train and test dataset with the help of caTools
+
+```{r}
+library(caTools)
+
+set.seed(123)
+
+
+split = sample.split(dataLoad$Purchased, SplitRatio = 0.75)
+train = subset(dataLoad, split == T)
+test = subset(dataLoad, split == F)
+
+```
+
+
+# creat a modal
+# glm stands for generalise linear modal 
+
+```{r}
+classifier <- glm(formula = Purchased~., family = "binomial", data = train)
+summary(classifier)
+
+```
+
+# prediction
+```{r}
+predict = predict(classifier, test, type = "response")
+predict
+```
+
+# response means is the way of telling R to generate output in the form of probability   
+```{r}
+test$prediction <- predict
+head(test)
+
+```
+
+# we can ifelse function use for if greater then 0.5 then eqaul to 1 and less then equal to 0
+```{r}
+test$probabilityAnswer <- ifelse(test$prediction <= 0.5,  0 , 1) 
+test
+
+table(test$Purchased, test$probabilityAnswer)
+table(test$probabilityAnswer)
+```
+
+# total accuracy is 83 = 57 + 26
+# and this is called confussion matrix
+
+
+
